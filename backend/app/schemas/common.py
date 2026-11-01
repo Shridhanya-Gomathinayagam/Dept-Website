@@ -35,7 +35,10 @@ def _split_list(value: Any) -> Any:
     if value is None:
         return []
     if isinstance(value, str):
-        parts = re.split(r"[\n,;]", value)
+        if "\n" in value:
+            parts = value.split("\n")
+        else:
+            parts = re.split(r"[,;]", value)
         return [p.strip() for p in parts if p.strip()]
     if isinstance(value, list):
         return [v.strip() if isinstance(v, str) else v for v in value if not (isinstance(v, str) and not v.strip())]

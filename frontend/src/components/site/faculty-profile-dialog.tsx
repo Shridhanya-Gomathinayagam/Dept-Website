@@ -41,11 +41,43 @@ function Block({ title, icon: Icon, children }: { title: string; icon?: typeof A
   );
 }
 
-function TextBlockSection({ title, text, icon }: { title: string; text: string | null; icon?: typeof Award }) {
+function TextBlockSection({
+  title,
+  text,
+  icon,
+  asParagraph = false,
+}: {
+  title: string;
+  text: string | null;
+  icon?: typeof Award;
+  asParagraph?: boolean;
+}) {
   if (!text) return null;
+  if (asParagraph) {
+    return (
+      <Block title={title} icon={icon}>
+        <p className="whitespace-pre-line text-sm leading-6 text-foreground/85">{text}</p>
+      </Block>
+    );
+  }
+
+  const items = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (items.length === 0) return null;
+
   return (
     <Block title={title} icon={icon}>
-      <p className="whitespace-pre-line text-sm leading-6 text-foreground/85">{text}</p>
+      <ul className="space-y-2.5">
+        {items.map((item, idx) => (
+          <li key={idx} className="flex items-start gap-2.5 text-sm leading-relaxed text-foreground/85">
+            <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
+            <span className="flex-1">{item.replace(/^[-•*]\s*/, "")}</span>
+          </li>
+        ))}
+      </ul>
     </Block>
   );
 }
@@ -62,6 +94,9 @@ function ProfileBody({ data }: { data: ProfileData }) {
     f.experience_years != null && { icon: Briefcase, text: `${f.experience_years} years of experience` },
     f.specialization && { icon: BookOpen, text: f.specialization },
   ].filter(Boolean) as { icon: typeof Award; text: string }[];
+
+  const hasPublications = publications.items.length > 0 || Boolean(f.publications_summary);
+  const hasPatents = patents.length > 0 || Boolean(f.patents_summary);
 
   return (
     <>
@@ -101,7 +136,7 @@ function ProfileBody({ data }: { data: ProfileData }) {
       {/* Body */}
       <div className="grid gap-5 bg-muted/40 p-5 sm:p-6 lg:grid-cols-[1fr_280px]">
         <div className="min-w-0 space-y-5">
-          <TextBlockSection title="About" text={f.bio} />
+          <TextBlockSection title="About" text={f.bio} asParagraph />
 
           {achievements.length > 0 && (
             <Block title="Achievements" icon={Award}>
@@ -121,44 +156,83 @@ function ProfileBody({ data }: { data: ProfileData }) {
             </Block>
           )}
 
-          {publications.items.length > 0 && (
-            <Block title={`Publications (${publications.total})`} icon={BookOpen}>
-              <ol className="space-y-3">
-                {publications.items.map((p) => (
-                  <li key={p.id} className="text-sm">
-                    <p className="font-medium leading-snug">
-                      {isSafeUrl(p.url) ? (
-                        <a href={p.url} target="_blank" rel="noopener noreferrer" className="hover:text-primary hover:underline">{p.title}</a>
-                      ) : (
-                        p.title
-                      )}
-                    </p>
-                    <p className="text-muted-foreground">
-                      {[p.authors, p.venue, p.year, humanize(p.pub_type), p.indexing].filter(Boolean).join(" · ")}
-                    </p>
-                  </li>
-                ))}
-              </ol>
+          {/* Unified Publications Block */}
+          {hasPublications && (
+            <Block title="Publications" icon={BookOpen}>
+              {publications.items.length > 0 && (
+                <ul className="space-y-3">
+                  {publications.items.map((p) => (
+                    <li key={p.id} className="flex items-start gap-2.5 text-sm">
+                      <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
+                      <div className="flex-1">
+                        <p className="font-medium leading-snug">
+                          {isSafeUrl(p.url) ? (
+                            <a href={p.url} target="_blank" rel="noopener noreferrer" className="hover:text-primary hover:underline">{p.title}</a>
+                          ) : (
+                            p.title
+                          )}
+                        </p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {[p.authors, p.venue, p.year, humanize(p.pub_type), p.indexing].filter(Boolean).join(" · ")}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {f.publications_summary && (
+                <ul className={`${publications.items.length > 0 ? "mt-3 pt-3 border-t" : ""} space-y-2.5`}>
+                  {f.publications_summary
+                    .split(/\r?\n/)
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                    .map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-2.5 text-sm leading-relaxed text-foreground/85">
+                        <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
+                        <span className="flex-1">{item.replace(/^[-•*]\s*/, "")}</span>
+                      </li>
+                    ))}
+                </ul>
+              )}
             </Block>
           )}
 
-          {patents.length > 0 && (
+          {/* Unified Patents Block */}
+          {hasPatents && (
             <Block title="Patents" icon={FileBadge}>
-              <ul className="space-y-2 text-sm">
-                {patents.map((p) => (
-                  <li key={p.id}>
-                    <p className="font-medium">{p.title}</p>
-                    <p className="text-muted-foreground">
-                      {[humanize(p.patent_status), p.year, p.patent_no ?? p.application_no].filter(Boolean).join(" · ")}
-                    </p>
-                  </li>
-                ))}
-              </ul>
+              {patents.length > 0 && (
+                <ul className="space-y-2 text-sm">
+                  {patents.map((p) => (
+                    <li key={p.id} className="flex items-start gap-2.5">
+                      <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
+                      <div className="flex-1">
+                        <p className="font-medium">{p.title}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {[humanize(p.patent_status), p.year, p.patent_no ?? p.application_no].filter(Boolean).join(" · ")}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {f.patents_summary && (
+                <ul className={`${patents.length > 0 ? "mt-3 pt-3 border-t" : ""} space-y-2.5`}>
+                  {f.patents_summary
+                    .split(/\r?\n/)
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                    .map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-2.5 text-sm leading-relaxed text-foreground/85">
+                        <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
+                        <span className="flex-1">{item.replace(/^[-•*]\s*/, "")}</span>
+                      </li>
+                    ))}
+                </ul>
+              )}
             </Block>
           )}
 
-          <TextBlockSection title="Publications (summary)" text={f.publications_summary} icon={BookOpen} />
-          <TextBlockSection title="Patents (summary)" text={f.patents_summary} icon={FileBadge} />
           <TextBlockSection title="Projects Guided" text={f.projects_guided} icon={Lightbulb} />
         </div>
 

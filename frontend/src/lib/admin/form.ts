@@ -98,12 +98,23 @@ export function toPayload(fields: FieldDef[], values: FormValues): Record<string
       case "student":
         out[f.name] = v === "" || v === undefined ? null : Number(v);
         break;
-      case "list":
-        out[f.name] = String(v ?? "")
-          .split(/\n|,|;/)
-          .map((s) => s.trim())
-          .filter(Boolean);
+      case "list": {
+        const text = String(v ?? "").trim();
+        if (!text) {
+          out[f.name] = [];
+        } else if (text.includes("\n")) {
+          out[f.name] = text
+            .split(/\r?\n/)
+            .map((s) => s.trim())
+            .filter(Boolean);
+        } else {
+          out[f.name] = text
+            .split(/[,;]/)
+            .map((s) => s.trim())
+            .filter(Boolean);
+        }
         break;
+      }
       case "datetime":
         out[f.name] = v ? `${v}:00` : null;
         break;

@@ -166,6 +166,9 @@ class FacultyListItem(BaseModel):
     specialization: str | None = None
     photo_url: str | None = None
     research_interests: list[str] = []
+    email: str | None = None
+    linkedin_url: str | None = None
+    google_scholar_url: str | None = None
 
 
 # ---------------------------------------------------------------- Students

@@ -42,11 +42,10 @@ class Settings(BaseSettings):
                 raise ValueError("JWT_SECRET must be set (>= 32 chars) in production")
             if not self.cookie_secure:
                 raise ValueError("COOKIE_SECURE must be true in production")
+            if not self.cloudinary_url:
+                raise ValueError("CLOUDINARY_URL must be set (cloudinary://API_KEY:API_SECRET@CLOUD_NAME)")
         elif not self.jwt_secret:
             raise ValueError("JWT_SECRET is not set. Copy .env.example to .env and set it.")
-        # Files are stored in Cloudinary; the local media folder is only for automated tests.
-        if not self.cloudinary_url and self.env != "test":
-            raise ValueError("CLOUDINARY_URL must be set (cloudinary://API_KEY:API_SECRET@CLOUD_NAME)")
         return self
 
 

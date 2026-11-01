@@ -82,6 +82,9 @@ export interface FacultyListItem {
   specialization: string | null;
   photo_url: string | null;
   research_interests: string[];
+  email?: string | null;
+  linkedin_url?: string | null;
+  google_scholar_url?: string | null;
 }
 
 export interface Faculty extends Meta, FacultyListItem {

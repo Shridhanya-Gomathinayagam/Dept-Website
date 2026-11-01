@@ -99,10 +99,10 @@ export const RESOURCES: ResourceConfig[] = [
         title: "Academic record",
         description: "Leave blank anything that does not apply; empty sections are hidden on the website.",
         fields: [
-          { name: "publications_summary", label: "Publications", type: "textarea", wide: true },
+          { name: "publications_summary", label: "Publications", type: "textarea", wide: true, help: "Enter each publication on a new line. They will appear with bullet points on the website profile." },
           { name: "patents_summary", label: "Patents", type: "textarea", wide: true },
-          { name: "certifications", label: "Certifications", type: "textarea", wide: true },
-          { name: "workshops", label: "Workshops / Conferences", type: "textarea", wide: true },
+          { name: "certifications", label: "Certifications", type: "textarea", wide: true, help: "Enter each certification on a new line (appears with bullet points)." },
+          { name: "workshops", label: "Workshops / Conferences", type: "textarea", wide: true, help: "Enter each workshop/conference on a new line (appears with bullet points)." },
           { name: "fdps", label: "FDPs", type: "textarea", wide: true },
           { name: "awards", label: "Awards", type: "textarea", wide: true },
           { name: "projects_guided", label: "Projects guided", type: "textarea", wide: true },

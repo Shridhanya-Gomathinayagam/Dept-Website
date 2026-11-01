@@ -1,150 +1,172 @@
-import { Award, Building2, CalendarCheck, CheckCircle2, Eye, Rocket } from "lucide-react";
+import { ArrowUpRight, Check, CircleDot } from "lucide-react";
 import type { Department } from "@/lib/types";
-import { TextBlock } from "./common";
+import { Container } from "./common";
 import { OutcomesSection } from "./outcomes-section";
-import { WaveDivider } from "./wave-divider";
 
-// Outer padding of the full-bleed panels: slim side margins; content spreads up to 96rem before they grow.
-const EDGE = "max(2rem, calc((100vw - 96rem) / 2 + 2rem))";
+const DEFAULT_TAGS = [
+  "Artificial Intelligence",
+  "Machine Learning",
+  "Deep Learning",
+  "Computer Vision",
+  "Generative AI",
+];
 
-/** Bullseye emblem sitting on the split between the two panels (decorative). */
-function Bullseye() {
-  return (
-    // The whole target (rings and arrow) tilts right-to-left in 3D, like a hanging board taking the hit.
-    <div className="relative animate-[target-tilt_3s_ease-in-out_infinite] motion-reduce:animate-none" aria-hidden>
-      <Rings />
-      {/* Arrow hitting the centre: shaft from top-right, head at the middle, fletching past the outer ring. */}
-      <svg viewBox="0 0 100 100" className="pointer-events-none absolute inset-0 size-full overflow-visible drop-shadow-[3px_4px_3px_rgba(2,8,23,0.35)]">
-        <g fill="#05070d" stroke="#05070d" strokeLinejoin="round">
-          <line x1="51" y1="49" x2="99.9" y2="0.1" strokeWidth="4.2" strokeLinecap="round" />
-          <polygon points="49.2,50.8 60.3,46.3 53.7,39.7" strokeWidth="1.2" />
-          <polygon points="82.8,17.2 101.5,-1.5 109.3,1.6 90.6,20.4" strokeWidth="1" />
-          <polygon points="82.8,17.2 101.5,-1.5 98.4,-9.3 79.6,9.4" strokeWidth="1" />
-        </g>
-        {/* Feather barbs */}
-        <g stroke="#ffffff" strokeOpacity="0.55" strokeWidth="1.05">
-          <line x1="87.4" y1="12.6" x2="94.6" y2="15.6" />
-          <line x1="92.1" y1="7.9" x2="99.3" y2="10.9" />
-          <line x1="96.8" y1="3.2" x2="104" y2="6.2" />
-          <line x1="87.4" y1="12.6" x2="84.4" y2="5.4" />
-          <line x1="92.1" y1="7.9" x2="89.1" y2="0.7" />
-          <line x1="96.8" y1="3.2" x2="93.8" y2="-4" />
-        </g>
-      </svg>
-    </div>
-  );
-}
+const DEFAULT_PARA_1 =
+  "The Department of Computer Science and Engineering (Artificial Intelligence and Machine Learning) at KPR Institute of Engineering and Technology excels in education, research, and innovation.";
 
-function Rings() {
-  return (
-    <div className="flex size-56 items-center justify-center rounded-full bg-white p-3 shadow-2xl shadow-sky-950/20 xl:size-64">
-      <div className="flex size-full items-center justify-center rounded-full bg-gradient-to-br from-sky-300 to-cta p-5">
-        <div className="flex size-full items-center justify-center rounded-full bg-white p-3">
-          <div className="flex size-full items-center justify-center rounded-full bg-band p-3">
-            <div className="flex size-full items-center justify-center rounded-full bg-white p-3">
-              <div className="flex size-full items-center justify-center rounded-full bg-band p-2.5">
-                <div className="size-full rounded-full bg-cta shadow-[0_0_18px] shadow-sky-400" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+const DEFAULT_PARA_2 =
+  "Our curriculum combines core computing with hands-on projects, industry collaborations, advanced laboratories, and experienced faculty.";
 
-/** About the department (dark panel) beside vision & mission (light panel), then outcomes and facilities. */
+const DEFAULT_VISION =
+  "To be a centre of excellence in computing education and research.";
+
+const DEFAULT_MISSION = [
+  "Provide quality education in computer science",
+  "Foster research, innovation and entrepreneurship",
+  "Develop ethical professionals who serve society",
+];
+
 export function AboutSection({ dept }: { dept: Department }) {
-  const facts = [
-    dept.year_established && { icon: CalendarCheck, label: "Established", value: String(dept.year_established) },
-    dept.accreditation && { icon: Award, label: "Accreditation", value: dept.accreditation },
-    dept.recognition && { icon: Building2, label: "Recognition", value: dept.recognition },
-  ].filter(Boolean) as { icon: typeof Award; label: string; value: string }[];
-  const hasVisionMission = Boolean(dept.vision) || dept.mission.length > 0;
+  // Extract paragraphs cleanly from overview or fallback
+  const overviewParas = dept.overview
+    ? dept.overview
+        .split(/\r?\n\s*\r?\n/)
+        .map((p) => p.trim())
+        .filter(Boolean)
+    : [];
+
+  const para1 = overviewParas[0] || dept.intro || DEFAULT_PARA_1;
+  const para2 = overviewParas[1] || DEFAULT_PARA_2;
+
+  const visionText = dept.vision || DEFAULT_VISION;
+  const missionItems = dept.mission && dept.mission.length > 0 ? dept.mission : DEFAULT_MISSION;
 
   return (
     <>
-      {/* Top padding (pt-24 / sm:pt-32) keeps content below the WaveDivider that overlaps this section's top. */}
-      <section id="about" aria-labelledby="about-heading" className={hasVisionMission ? "grid scroll-mt-16 lg:grid-cols-[45%_55%]" : "scroll-mt-16"}>
-        {/* Left: about the department */}
-        <div
-          className="theme-dark relative isolate overflow-hidden bg-gradient-to-br from-[#0a1128] to-[#020817] pb-28 pl-4 pr-4 pt-24 sm:pb-36 sm:pl-6 sm:pr-6 sm:pt-32 lg:pb-40 lg:pl-(--edge) lg:pr-32 xl:pr-36"
-          style={{ "--edge": EDGE } as React.CSSProperties}
-        >
-          <div className="pointer-events-none absolute -left-24 top-10 -z-10 size-96 rounded-full bg-sky-500/15 mix-blend-screen blur-3xl" aria-hidden />
-          <h2 id="about-heading" className="font-heading text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
-            About the{" "}
-            <br />
-            <span className="bg-gradient-to-r from-sky-300 via-cyan-400 to-sky-500 bg-clip-text text-transparent">Department</span>
-          </h2>
-          {dept.overview && <TextBlock text={dept.overview} className="mt-6 text-muted-foreground" />}
-          {facts.length > 0 && (
-            <dl className="mt-8 grid gap-3 sm:grid-cols-2">
-              {facts.map((f) => (
-                <div key={f.label} className="flex items-start gap-3 rounded-xl border border-sky-400/20 bg-white/5 p-4 backdrop-blur transition hover:border-sky-300/50 hover:bg-white/10">
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-sky-400/10 ring-1 ring-sky-400/30">
-                    <f.icon className="size-5 text-sky-300" aria-hidden />
-                  </span>
-                  <div className="min-w-0">
-                    <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{f.label}</dt>
-                    <dd className="mt-0.5 whitespace-pre-line font-semibold">{f.value}</dd>
-                  </div>
-                </div>
-              ))}
-            </dl>
-          )}
-        </div>
+      <section
+        id="about"
+        aria-labelledby="about-heading"
+        className="relative scroll-mt-16 bg-white pb-6 pt-16 sm:pb-8 sm:pt-20 lg:pb-10 lg:pt-24"
+      >
+        <Container>
+          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-14 xl:gap-20">
+            {/* Left Column: Descriptive info & tags */}
+            <div className="lg:col-span-7">
+              <p className="text-xs font-bold uppercase tracking-widest text-[#0369a1] sm:text-sm">
+                About the Department
+              </p>
 
-        {/* Right: vision & mission, with the bullseye on the split line */}
-        {hasVisionMission && (
-          <div
-            id="vision"
-            className="relative flex scroll-mt-16 items-stretch bg-muted pb-28 pl-4 pr-4 pt-12 sm:pb-36 sm:pl-6 sm:pr-6 lg:pb-40 lg:pl-32 lg:pt-32 lg:pr-(--edge) xl:pl-36"
-            style={{ "--edge": EDGE } as React.CSSProperties}
-          >
-            <div className="absolute left-0 top-[calc(50%+2.5rem)] z-10 hidden -translate-x-1/2 -translate-y-1/2 lg:block">
-              <Bullseye />
+              <h2
+                id="about-heading"
+                className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-[#0a1128] sm:text-4xl lg:text-[2.75rem] lg:leading-[1.16]"
+              >
+                Turning ideas into{" "}
+                <span className="text-[#0284c7]">intelligent solutions</span>
+              </h2>
+
+              <div className="mt-6 space-y-4 text-base leading-relaxed text-slate-600 sm:text-lg">
+                <p>{para1}</p>
+                <p>{para2}</p>
+              </div>
+
+              {/* Focus tags / technologies */}
+              <div className="mt-7 flex flex-wrap gap-2.5">
+                {DEFAULT_TAGS.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center rounded-full border border-sky-200/60 bg-sky-100/70 px-4 py-1.5 text-xs font-semibold text-sky-700 transition hover:bg-sky-200/70 sm:text-sm"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
             </div>
-            {/* The cards fill the panel top to bottom: each keeps its content height and the spare
-                space is shared between them (auto rows stretch), so no empty band is left above or below. */}
-            <div className="grid w-full gap-5">
-              {dept.vision && (
-                <article className="group flex gap-4 rounded-2xl border bg-card p-6 shadow-lg shadow-slate-900/5 transition hover:-translate-y-0.5 hover:shadow-xl sm:p-7">
-                  <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
-                    <Eye className="size-6" aria-hidden />
-                  </span>
-                  <div>
-                    <h3 className="font-heading text-xl font-bold">Our Vision</h3>
-                    <TextBlock text={dept.vision} className="mt-2 text-muted-foreground" />
+
+            {/* Right Column: Stacked Vision & Mission Cards with Hover Effects */}
+            <div className="flex flex-col gap-6 lg:col-span-5">
+              {/* Vision Card (White, top-accented, hover elevation & glow) */}
+              <article className="group relative cursor-default overflow-hidden rounded-[1.75rem] border border-slate-200/90 border-t-[4px] border-t-sky-500 bg-white p-6 shadow-lg shadow-slate-200/50 transition-all duration-300 hover:-translate-y-2 hover:border-sky-400 hover:shadow-2xl hover:shadow-sky-500/15 sm:p-8">
+                {/* Accent line glow on hover */}
+                <div
+                  className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-sky-400 via-cyan-400 to-sky-600 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                  aria-hidden
+                />
+
+                <div className="flex items-center gap-4">
+                  <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-sky-100/90 text-sky-600 shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 group-hover:bg-sky-500 group-hover:text-white sm:size-12">
+                    <CircleDot className="size-6 stroke-[2.2]" aria-hidden />
                   </div>
-                </article>
-              )}
-              {dept.mission.length > 0 && (
-                // Highlighted card.
-                <article className="group flex gap-4 rounded-2xl bg-cta p-6 text-cta-foreground shadow-xl shadow-sky-500/25 transition hover:-translate-y-0.5 sm:p-7">
-                  <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white/30">
-                    <Rocket className="size-6" aria-hidden />
-                  </span>
-                  <div>
-                    <h3 className="font-heading text-xl font-bold text-cta-foreground">Our Mission</h3>
-                    <ul className="mt-3 space-y-2.5">
-                      {dept.mission.map((m, i) => (
-                        <li key={i} className="flex gap-2.5 leading-7">
-                          <CheckCircle2 className="mt-1 size-5 shrink-0" aria-hidden />
-                          {m}
-                        </li>
-                      ))}
-                    </ul>
+                  <h3 className="font-heading text-xl font-bold tracking-tight text-slate-900 transition-colors duration-300 group-hover:text-[#0369a1] sm:text-2xl">
+                    Our Vision
+                  </h3>
+                </div>
+                <p className="mt-4 text-sm leading-relaxed text-slate-600 sm:text-base">
+                  {visionText}
+                </p>
+              </article>
+
+              {/* Mission Card (Midnight dark, glowing shadow, animated hover state) */}
+              <article className="group relative cursor-default overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#020817] p-6 text-white shadow-2xl shadow-slate-950/40 transition-all duration-300 hover:-translate-y-2 hover:border-sky-400/50 hover:shadow-[0_25px_60px_-15px_rgba(14,165,233,0.3)] sm:p-8">
+                {/* Soft ambient corner glow on hover */}
+                <div
+                  className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-sky-500/15 blur-2xl transition-opacity duration-300 group-hover:opacity-100 opacity-40"
+                  aria-hidden
+                />
+
+                <div className="relative flex items-center gap-4">
+                  <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[#0ea5e9] text-slate-950 shadow-md shadow-sky-500/25 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 group-hover:bg-white group-hover:shadow-sky-400/50 sm:size-12">
+                    <ArrowUpRight className="size-6 stroke-[2.5]" aria-hidden />
                   </div>
-                </article>
-              )}
+                  <h3 className="font-heading text-xl font-bold tracking-tight text-white transition-colors duration-300 group-hover:text-sky-300 sm:text-2xl">
+                    Our Mission
+                  </h3>
+                </div>
+
+                <ul className="relative mt-6 space-y-3.5">
+                  {missionItems.map((item, idx) => (
+                    <li
+                      key={idx}
+                      className="flex items-start gap-3 transition-transform duration-200 hover:translate-x-1.5"
+                    >
+                      <Check
+                        className="mt-1 size-4.5 shrink-0 stroke-[2.5] text-[#38bdf8] transition-transform duration-200 group-hover:scale-110"
+                        aria-hidden
+                      />
+                      <span className="text-sm leading-relaxed text-slate-200 sm:text-base">
+                        {item}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
             </div>
           </div>
-        )}
+        </Container>
       </section>
 
-      {/* The white Outcomes section rises into the bottom of the About panels (needs their extra bottom padding). */}
-      <WaveDivider id="about-outcomes" flip fill="#ffffff" />
+      {/* Section Separator: Floating Target Badge (Design 5) with Dynamic Hover Interaction */}
+      <div className="relative flex items-center justify-center py-2 bg-white">
+        <a
+          href="#outcomes"
+          aria-label="Scroll to Programme Objectives & Outcomes"
+          className="group/sep flex w-full items-center justify-center transition-all duration-300"
+        >
+          {/* Left horizontal line: illuminates from subtle slate to electric cyan glow */}
+          <div className="h-[1.5px] flex-1 max-w-xs sm:max-w-md lg:max-w-xl bg-gradient-to-r from-transparent via-slate-200 to-slate-300 transition-all duration-500 group-hover/sep:via-sky-400 group-hover/sep:to-cyan-400 group-hover/sep:shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
+
+          {/* Central Target Badge: scales up, glows neon cyan and rotates on hover */}
+          <div className="mx-4 sm:mx-6 flex size-12 sm:size-14 shrink-0 items-center justify-center rounded-full bg-[#020817] shadow-md ring-4 ring-slate-100 transition-all duration-500 group-hover/sep:scale-125 group-hover/sep:rotate-45 group-hover/sep:ring-4 group-hover/sep:ring-sky-400 group-hover/sep:shadow-[0_0_30px_rgba(56,189,248,0.7)]">
+            <div className="flex size-7 sm:size-8 items-center justify-center rounded-full border-2 border-sky-400/80 transition-all duration-500 group-hover/sep:border-cyan-200 group-hover/sep:scale-110">
+              <div className="size-2.5 sm:size-3 rounded-full bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.9)] transition-all duration-500 group-hover/sep:scale-125 group-hover/sep:bg-white group-hover/sep:shadow-[0_0_15px_rgba(255,255,255,1)]" />
+            </div>
+          </div>
+
+          {/* Right horizontal line: illuminates from subtle slate to electric cyan glow */}
+          <div className="h-[1.5px] flex-1 max-w-xs sm:max-w-md lg:max-w-xl bg-gradient-to-l from-transparent via-slate-200 to-slate-300 transition-all duration-500 group-hover/sep:via-sky-400 group-hover/sep:to-cyan-400 group-hover/sep:shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
+        </a>
+      </div>
+
+      {/* Program Educational Objectives & Outcomes */}
       <OutcomesSection dept={dept} />
     </>
   );
